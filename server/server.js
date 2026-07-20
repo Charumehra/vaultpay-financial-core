@@ -5,6 +5,7 @@ import authRoutes from "./src/routes/authRoutes.js";
 import cookieParser from "cookie-parser";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import invoiceRoutes from "./src/routes/invoiceRoutes.js";
+import paymentRoutes from "./src/routes/paymentsRoutes.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/invoices", invoiceRoutes);
+app.use("/api/payments", paymentRoutes);
 
 
 const PORT = process.env.PORT || 5000;
