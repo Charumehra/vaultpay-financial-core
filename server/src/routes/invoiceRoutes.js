@@ -7,6 +7,7 @@ import {
   updateInvoice,
   deleteInvoice,
   getRevenue,
+  downloadReceipt,
 } from "../controllers/invoiceController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -23,5 +24,6 @@ router.delete("/:id", protect, authorize("admin"), deleteInvoice);
 router.get("/my", protect, authorize("client"), getMyInvoices);
 
 router.get("/:id", protect, getInvoiceById);
+router.get("/:id/download", protect, downloadReceipt);
 
 export default router;

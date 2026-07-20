@@ -1,5 +1,6 @@
 import Invoice from "../models/Invoice.js";
 import User from "../models/User.js";
+import fs from "fs";
 
 export const createInvoice = async (req, res) => {
   try {
@@ -81,7 +82,7 @@ export const getInvoiceById = async (req, res) => {
     if (req.user.role === "admin") {
       invoice = await Invoice.findById(req.params.id).populate(
         "client",
-        "name email"
+        "name email",
       );
     } else {
       invoice = await Invoice.findOne({
@@ -111,14 +112,10 @@ export const getInvoiceById = async (req, res) => {
 
 export const updateInvoice = async (req, res) => {
   try {
-    const invoice = await Invoice.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const invoice = await Invoice.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!invoice) {
       return res.status(404).json({
@@ -195,6 +192,43 @@ export const getRevenue = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const downloadReceipt = async (req, res) => {
+  try {
+    const invoice = await Invoice.findById(req.params.id).populate("client");
+
+    if (!invoice) {
+      return res.status(404).json({
+        success: false,
+        message: "Invoice not found",
+      });
+    }
+
+    if (
+      req.user.role === "client" &&
+      invoice.client._id.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
+    }
+
+    if (!invoice.pdfUrl || !fs.existsSync(invoice.pdfUrl)) {
+      return res.status(404).json({
+        success: false,
+        message: "Receipt not found",
+      });
+    }
+
+    return res.download(invoice.pdfUrl, `${invoice.invoiceNumber}.pdf`);
+  } catch (error) {
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
