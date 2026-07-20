@@ -6,12 +6,15 @@ import cookieParser from "cookie-parser";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import invoiceRoutes from "./src/routes/invoiceRoutes.js";
 import paymentRoutes from "./src/routes/paymentsRoutes.js";
+import webhookRoutes from "./src/routes/webhookRoutes.js";
 
 dotenv.config();
 
 connectDB();
 
 const app = express();
+
+app.use("/api/webhooks", webhookRoutes);
 
 app.use(express.json());
 app.use(cookieParser());
