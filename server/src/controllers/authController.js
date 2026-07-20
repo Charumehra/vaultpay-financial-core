@@ -100,6 +100,7 @@ export const logout = async (req, res) => {
 
 export const getMe = async (req, res) => {
   res.json({
-    message: "Authentication middleware coming next.",
+    success: true,
+    user: req.user,
   });
 };
