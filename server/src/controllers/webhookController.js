@@ -1,5 +1,6 @@
 import stripe from "../config/stripe.js";
 import Invoice from "../models/Invoice.js";
+import { generateReceipt } from "../utils/generateReceipt.js";
 
 export const stripeWebhook = async (req, res) => {
   const signature = req.headers["stripe-signature"];
@@ -10,7 +11,7 @@ export const stripeWebhook = async (req, res) => {
     event = stripe.webhooks.constructEvent(
       req.body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET
+      process.env.STRIPE_WEBHOOK_SECRET,
     );
   } catch (err) {
     console.log("Signature Verification Failed");
@@ -26,10 +27,15 @@ export const stripeWebhook = async (req, res) => {
 
     if (invoice) {
       invoice.status = "Paid";
+      await invoice.populate("client");
+
+      const pdfPath = await generateReceipt(invoice);
+
+      invoice.pdfUrl = pdfPath;
 
       await invoice.save();
 
-      console.log(`Invoice ${invoice.invoiceNumber} marked as PAID`);
+      console.log("Receipt Generated:", pdfPath);
     }
   }
 
