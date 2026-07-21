@@ -2,9 +2,55 @@ import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import loginImage from "../assets/login.svg";
-
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const { fetchUser } = useAuth();
+
+  const [loading, setLoading] = useState(false);
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      const { data } = await api.post("/auth/login", formData);
+
+      if (data.success) {
+        toast.success("Login Successful");
+
+        await fetchUser();
+
+        if (data.user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/client/dashboard");
+        }
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Login Failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 flex">
@@ -16,20 +62,16 @@ export default function Login() {
           transition={{ duration: 0.8 }}
           className="text-center text-white"
         >
-          <h1 className="text-5xl font-bold mb-6">
-            VaultPay
-          </h1>
+          <h1 className="text-5xl font-bold mb-6">VaultPay</h1>
 
-          <p className="text-xl">
-            Secure Financial Core Platform
-          </p>
+          <p className="text-xl">Secure Financial Core Platform</p>
 
           <div className="mt-12">
             <img
-  src={loginImage}
-  alt="Login Illustration"
-  className="w-96 mx-auto"
-/>
+              src={loginImage}
+              alt="Login Illustration"
+              className="w-96 mx-auto"
+            />
           </div>
         </motion.div>
       </div>
@@ -42,27 +84,24 @@ export default function Login() {
           transition={{ duration: 0.7 }}
           className="w-full max-w-md rounded-3xl bg-white p-10 shadow-xl"
         >
-          <h2 className="text-3xl font-bold text-slate-800">
-            Welcome Back 👋
-          </h2>
+          <h2 className="text-3xl font-bold text-slate-800">Welcome Back </h2>
 
-          <p className="mt-2 text-slate-500">
-            Login to continue
-          </p>
+          <p className="mt-2 text-slate-500">Login to continue</p>
 
-          <form className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             {/* Email */}
             <div>
-              <label className="mb-2 block text-sm font-semibold">
-                Email
-              </label>
+              <label className="mb-2 block text-sm font-semibold">Email</label>
 
               <div className="flex items-center rounded-xl border bg-slate-50 px-4">
                 <Mail size={18} className="text-slate-400" />
 
                 <input
                   type="email"
-                  placeholder="Enter email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter Email"
                   className="w-full bg-transparent px-3 py-3 outline-none"
                 />
               </div>
@@ -79,7 +118,10 @@ export default function Login() {
 
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter Password"
                   className="w-full bg-transparent px-3 py-3 outline-none"
                 />
 
@@ -87,19 +129,17 @@ export default function Login() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
             <button
-              className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-xl bg-blue-600 py-3 text-white"
             >
-              Login
+              {loading ? "Logging In..." : "Login"}
             </button>
           </form>
         </motion.div>

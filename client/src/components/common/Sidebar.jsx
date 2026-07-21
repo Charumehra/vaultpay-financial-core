@@ -1,83 +1,53 @@
+import { LayoutDashboard, FileText, Users, CreditCard, LogOut } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  CreditCard,
-} from "lucide-react";
 
-import { useAuth } from "../../context/AuthContext";
+const menu = [
+  {
+    title: "Dashboard",
+    path: "/admin/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Invoices",
+    path: "/admin/invoices",
+    icon: FileText,
+  },
+  {
+    title: "Clients",
+    path: "/admin/clients",
+    icon: Users,
+  },
+  {
+    title: "Payments",
+    path: "/admin/payments",
+    icon: CreditCard,
+  },
+];
 
 export default function Sidebar() {
-  const { user } = useAuth();
-
-  const adminLinks = [
-    {
-      name: "Dashboard",
-      icon: LayoutDashboard,
-      path: "/admin/dashboard",
-    },
-    {
-      name: "Invoices",
-      icon: FileText,
-      path: "/admin/invoices",
-    },
-    {
-      name: "Clients",
-      icon: Users,
-      path: "/admin/clients",
-    },
-    {
-      name: "Payments",
-      icon: CreditCard,
-      path: "/admin/payments",
-    },
-  ];
-
-  const clientLinks = [
-    {
-      name: "Dashboard",
-      icon: LayoutDashboard,
-      path: "/client/dashboard",
-    },
-    {
-      name: "My Invoices",
-      icon: FileText,
-      path: "/client/invoices",
-    },
-    {
-      name: "Payments",
-      icon: CreditCard,
-      path: "/client/payments",
-    },
-  ];
-
-  const links =
-    user?.role === "admin"
-      ? adminLinks
-      : clientLinks;
-
   return (
-    <aside className="hidden min-h-[calc(100vh-64px)] w-64 border-r bg-white md:block">
-      <div className="space-y-2 p-4">
-        {links.map((item) => (
+    <aside className="hidden md:flex w-64 bg-slate-900 text-white flex-col">
+      <div className="p-6 text-2xl font-bold border-b border-slate-700">
+        VaultPay
+      </div>
+
+      <nav className="flex-1 p-4 space-y-2">
+        {menu.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }) =>
-              `flex items-center gap-3 rounded-xl px-4 py-3 transition ${
-                isActive
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-600 hover:bg-blue-50"
-              }`
-            }
+            className="flex items-center gap-3 rounded-lg p-3 hover:bg-slate-800"
           >
             <item.icon size={20} />
-
-            {item.name}
+            {item.title}
           </NavLink>
         ))}
-      </div>
+      </nav>
+
+      <button className="m-4 flex items-center gap-3 rounded-lg bg-red-600 p-3 hover:bg-red-700">
+        <LogOut size={20} />
+        Logout
+      </button>
     </aside>
   );
 }
